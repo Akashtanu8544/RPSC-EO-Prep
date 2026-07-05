@@ -17,9 +17,6 @@ workflows:
         - pattern: 'main'
         - pattern: 'master'
     scripts:
-      - name: Generate local.properties
-        script: |
-          echo "sdk.dir=$ANDROID_SDK_ROOT" > local.properties
       - name: Grant permissions to Gradle
         script: |
           chmod +x gradlew
