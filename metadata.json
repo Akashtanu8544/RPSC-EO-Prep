@@ -1,0 +1,6 @@
+{
+  "name": "EO RO Officer",
+  "description": "Premium preparation app for the Rajasthan Public Service Commission (RPSC) Executive Officer and Revenue Officer exam. Features bilingual study materials, Kindle-style reading, interactive mock tests, adaptive flashcards, and live analytics.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
