@@ -31,27 +31,31 @@ jobs:
       - name: Run Unit Tests
         run: ./gradlew :app:testDebugUnitTest --no-daemon
 
-      # Decode release keystore if RELEASE_KEYSTORE_BASE64 secret is provided.
-      # If no secret is set, it can fall back to using a debug keystore or skip signing to prevent failure during initial setup.
-      - name: Decode Release Keystore
-        id: decode_keystore
+      # Set up the release signing keystore. If the user has provided a base64-encoded keystore
+      # in the GitHub repository secrets, we decode it. If not, we generate a fallback
+      # self-signed keystore to ensure that the build always succeeds in the CI pipeline.
+      - name: Setup Release Signing Keystore
+        id: setup_keystore
         run: |
           if [ -n "${{ secrets.RELEASE_KEYSTORE_BASE64 }}" ]; then
             echo "Decoding release keystore from base64..."
             echo "${{ secrets.RELEASE_KEYSTORE_BASE64 }}" | base64 --decode > my-upload-key.jks
-            echo "has_keystore=true" >> $GITHUB_OUTPUT
+            echo "store_password=${{ secrets.STORE_PASSWORD }}" >> $GITHUB_OUTPUT
+            echo "key_password=${{ secrets.KEY_PASSWORD }}" >> $GITHUB_OUTPUT
           else
-            echo "No RELEASE_KEYSTORE_BASE64 secret found. Release AAB will be built unsigned or signed using debug keys depending on Gradle configuration."
-            echo "has_keystore=false" >> $GITHUB_OUTPUT
+            echo "No RELEASE_KEYSTORE_BASE64 secret found. Generating fallback self-signed keystore to guarantee successful AAB generation..."
+            keytool -genkey -v -keystore my-upload-key.jks -alias upload -keyalg RSA -keysize 2048 -validity 10000 -dname "CN=eoro, OU=app, O=eoro, L=Unknown, S=Unknown, C=US" -storepass fallback_password -keypass fallback_password
+            echo "store_password=fallback_password" >> $GITHUB_OUTPUT
+            echo "key_password=fallback_password" >> $GITHUB_OUTPUT
           fi
 
       # Build the signed/unsigned Android App Bundle (AAB)
       - name: Build Release Bundle (AAB)
         run: ./gradlew :app:bundleRelease --no-daemon
         env:
-          KEYSTORE_PATH: ${{ steps.decode_keystore.outputs.has_keystore == 'true' && 'my-upload-key.jks' || '' }}
-          STORE_PASSWORD: ${{ secrets.STORE_PASSWORD }}
-          KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
+          KEYSTORE_PATH: ${{ github.workspace }}/my-upload-key.jks
+          STORE_PASSWORD: ${{ steps.setup_keystore.outputs.store_password }}
+          KEY_PASSWORD: ${{ steps.setup_keystore.outputs.key_password }}
 
       # Upload the built Android App Bundle artifact
       - name: Upload Release AAB Artifact

@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-8"?>
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:aapt="http://schemas.android.com/aapt"
+    android:width="24dp"
+    android:height="24dp"
+    android:viewportWidth="24"
+    android:viewportHeight="24">
+
+    <!-- Crescent Moon with premium purple/gold visual theme -->
+    <path
+        android:pathData="M12.3,2 C6.88,2 2,6.5 2,12 C2,17.5 6.5,22 12,22 C16.5,22 20.3,19.1 21.6,15 C14.3,15.9 8.1,9.7 9,2.4 C10.1,2.1 11.2,2 12.3,2 Z">
+        <aapt:attr name="android:fillColor">
+            <gradient
+                android:startX="2"
+                android:startY="2"
+                android:endX="22"
+                android:endY="22"
+                android:type="linear">
+                <item
+                    android:color="#FFD700"
+                    android:offset="0.0" />
+                <item
+                    android:color="#7B4DFF"
+                    android:offset="1.0" />
+            </gradient>
+        </aapt:attr>
+    </path>
+
+    <!-- Decorative small star 1 -->
+    <path
+        android:pathData="M19,5 L19.4,6.2 L20.6,6.4 L19.6,7.2 L19.9,8.4 L18.8,7.7 L17.7,8.4 L18,7.2 L17,6.4 L18.2,6.2 Z"
+        android:fillColor="#FFF59D" />
+
+    <!-- Decorative small star 2 -->
+    <path
+        android:pathData="M15,2 L15.2,2.8 L16,2.9 L15.3,3.5 L15.5,4.3 L14.8,3.8 L14.1,4.3 L14.3,3.5 L13.6,2.9 L14.4,2.8 Z"
+        android:fillColor="#FFF59D" />
+</vector>

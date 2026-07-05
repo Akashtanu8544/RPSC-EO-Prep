@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="utf-8"?>
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:aapt="http://schemas.android.com/aapt"
+    android:width="24dp"
+    android:height="24dp"
+    android:viewportWidth="24"
+    android:viewportHeight="24">
+
+    <!-- Subtle background container/glow if needed, but keeping it clean and transparent -->
+    
+    <!-- Left Page of Open Book -->
+    <path
+        android:pathData="M12,5.5 C9.5,4 5.5,4 3,5.5 L3,18.5 C5.5,17 9.5,17 12,18.5 Z">
+        <aapt:attr name="android:fillColor">
+            <gradient
+                android:startX="3"
+                android:startY="4"
+                android:endX="12"
+                android:endY="18.5"
+                android:type="linear">
+                <item
+                    android:color="#FFD700"
+                    android:offset="0.0" />
+                <item
+                    android:color="#D4AF37"
+                    android:offset="1.0" />
+            </gradient>
+        </aapt:attr>
+    </path>
+
+    <!-- Right Page of Open Book -->
+    <path
+        android:pathData="M12,5.5 C14.5,4 18.5,4 21,5.5 L21,18.5 C18.5,17 14.5,17 12,18.5 Z">
+        <aapt:attr name="android:fillColor">
+            <gradient
+                android:startX="12"
+                android:startY="4"
+                android:endX="21"
+                android:endY="18.5"
+                android:type="linear">
+                <item
+                    android:color="#FFE082"
+                    android:offset="0.0" />
+                <item
+                    android:color="#AA7C11"
+                    android:offset="1.0" />
+            </gradient>
+        </aapt:attr>
+    </path>
+
+    <!-- Center Book Spine Ribbon -->
+    <path
+        android:pathData="M12,5.5 L12,19.5"
+        android:strokeWidth="1.5"
+        android:strokeColor="#7B4DFF"
+        android:strokeLineCap="round" />
+
+    <!-- Sleek decorative horizontal line details representing text (Left Page) -->
+    <path
+        android:pathData="M5,8 L10,8 M5,11 L10,11 M5,14 L9,14"
+        android:strokeWidth="1"
+        android:strokeColor="#33000000"
+        android:strokeLineCap="round" />
+
+    <!-- Sleek decorative horizontal line details representing text (Right Page) -->
+    <path
+        android:pathData="M14,8 L19,8 M14,11 L19,11 M15,14 L19,14"
+        android:strokeWidth="1"
+        android:strokeColor="#22FFFFFF"
+        android:strokeLineCap="round" />
+</vector>

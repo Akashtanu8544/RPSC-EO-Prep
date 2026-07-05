@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="utf-8"?>
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:aapt="http://schemas.android.com/aapt"
+    android:width="24dp"
+    android:height="24dp"
+    android:viewportWidth="24"
+    android:viewportHeight="24">
+
+    <!-- Inner Golden Core of the Sun -->
+    <path
+        android:pathData="M12,12m-4.5,0a4.5,4.5 0,1 1,9 0a4.5,4.5 0,1 1,-9 0">
+        <aapt:attr name="android:fillColor">
+            <gradient
+                android:startX="7.5"
+                android:startY="7.5"
+                android:endX="16.5"
+                android:endY="16.5"
+                android:type="linear">
+                <item
+                    android:color="#FFF9C4"
+                    android:offset="0.0" />
+                <item
+                    android:color="#FBC02D"
+                    android:offset="1.0" />
+            </gradient>
+        </aapt:attr>
+    </path>
+
+    <!-- Radiating Sun Rays in symmetrical arrangement -->
+    <!-- Top & Bottom Rays -->
+    <path
+        android:pathData="M12,2 L12,4 M12,20 L12,22"
+        android:strokeWidth="1.8"
+        android:strokeColor="#FFD700"
+        android:strokeLineCap="round" />
+
+    <!-- Left & Right Rays -->
+    <path
+        android:pathData="M2,12 L4,12 M20,12 L22,12"
+        android:strokeWidth="1.8"
+        android:strokeColor="#FFD700"
+        android:strokeLineCap="round" />
+
+    <!-- Diagonal Rays -->
+    <path
+        android:pathData="M4.9,4.9 L6.3,6.3 M17.7,17.7 L19.1,19.1"
+        android:strokeWidth="1.8"
+        android:strokeColor="#FFD700"
+        android:strokeLineCap="round" />
+    <path
+        android:pathData="M19.1,4.9 L17.7,6.3 M6.3,17.7 L4.9,19.1"
+        android:strokeWidth="1.8"
+        android:strokeColor="#FFD700"
+        android:strokeLineCap="round" />
+</vector>

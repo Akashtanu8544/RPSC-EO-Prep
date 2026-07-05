@@ -68,6 +68,29 @@ fun PremiumGradientBrush(): Brush {
     )
 }
 
+// Reusable extension modifier for consistent refined container background
+fun Modifier.premiumBackground(isDark: Boolean): Modifier = this.then(
+    Modifier.background(
+        brush = if (isDark) {
+            Brush.verticalGradient(
+                colors = listOf(
+                    PremiumObsidian,
+                    Color(0xFF14132B), // elegant dark deep navy/violet blend
+                    PremiumObsidian
+                )
+            )
+        } else {
+            Brush.verticalGradient(
+                colors = listOf(
+                    PureWhite,
+                    Color(0xFFF3F1FD), // beautiful soft hint of light pastel violet
+                    PureWhite
+                )
+            )
+        }
+    )
+)
+
 // ----------------- SPLASH & ONBOARDING SCREEN -----------------
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -93,10 +116,14 @@ fun OnboardingScreen(
         label = "logoOffset"
     )
 
+    val isSystemDark = isSystemInDarkTheme()
+    val darkModeVal by viewModel.darkModeFlow.collectAsStateWithLifecycle()
+    val activeDark = darkModeVal ?: isSystemDark
+
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .background(MaterialTheme.colorScheme.background)
+            .premiumBackground(activeDark)
             .windowInsetsPadding(WindowInsets.safeDrawing)
     ) {
         Column(
@@ -320,7 +347,7 @@ fun HomeScreen(
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .background(MaterialTheme.colorScheme.background)
+            .premiumBackground(activeDark)
             .windowInsetsPadding(WindowInsets.safeDrawing)
     ) {
         Column(
@@ -361,9 +388,10 @@ fun HomeScreen(
                             .testTag("home_lang_toggle")
                     ) {
                         Icon(
-                            imageVector = Icons.Default.Translate,
+                            painter = painterResource(id = com.example.R.drawable.ic_language_custom),
                             contentDescription = "Switch language",
-                            tint = PurpleGradStart
+                            tint = PurpleGradStart,
+                            modifier = Modifier.size(24.dp)
                         )
                     }
 
@@ -375,9 +403,14 @@ fun HomeScreen(
                             .testTag("home_dark_toggle")
                     ) {
                         Icon(
-                            imageVector = if (activeDark) Icons.Default.LightMode else Icons.Default.DarkMode,
+                            painter = if (activeDark) {
+                                painterResource(id = com.example.R.drawable.ic_light_mode_custom)
+                            } else {
+                                painterResource(id = com.example.R.drawable.ic_dark_mode_custom)
+                            },
                             contentDescription = "Toggle Theme",
-                            tint = PurpleGradStart
+                            tint = PurpleGradStart,
+                            modifier = Modifier.size(24.dp)
                         )
                     }
 
@@ -389,9 +422,10 @@ fun HomeScreen(
                             .testTag("home_cms_info")
                     ) {
                         Icon(
-                            imageVector = Icons.Default.CloudSync,
+                            painter = painterResource(id = com.example.R.drawable.ic_sync_custom),
                             contentDescription = "CMS Manager",
-                            tint = PurpleGradStart
+                            tint = PurpleGradStart,
+                            modifier = Modifier.size(24.dp)
                         )
                     }
                 }
@@ -405,16 +439,21 @@ fun HomeScreen(
                     .fillMaxWidth()
                     .padding(vertical = 8.dp)
                     .border(
-                        width = 1.dp,
+                        width = 1.2.dp,
                         brush = Brush.linearGradient(
-                            colors = listOf(PremiumGold, Color.White.copy(alpha = 0.2f))
+                            colors = listOf(PremiumGold, PurpleGradStart.copy(alpha = 0.3f))
                         ),
                         shape = RoundedCornerShape(24.dp)
                     ),
                 shape = RoundedCornerShape(24.dp),
                 colors = CardDefaults.cardColors(
-                    containerColor = MaterialTheme.colorScheme.surface.copy(alpha = 0.45f)
-                )
+                    containerColor = if (activeDark) {
+                        PremiumCardBg.copy(alpha = 0.65f)
+                    } else {
+                        PureWhite.copy(alpha = 0.85f)
+                    }
+                ),
+                elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
             ) {
                 Column(modifier = Modifier.padding(20.dp)) {
                     // Officer Profile Info Row
@@ -464,23 +503,82 @@ fun HomeScreen(
 
                     Row(
                         modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.SpaceBetween
+                        horizontalArrangement = Arrangement.spacedBy(10.dp)
                     ) {
-                        StatItem(
-                            label = Localization.getString("streak", lang),
-                            value = "${stats.dailyStreak} 🔥",
-                            modifier = Modifier.weight(1f)
-                        )
-                        StatItem(
-                            label = Localization.getString("target", lang),
-                            value = "${stats.completedChapterCount}/8 ${Localization.getString("chapters", lang)}",
-                            modifier = Modifier.weight(1f)
-                        )
-                        StatItem(
-                            label = Localization.getString("avg_score", lang),
-                            value = "${stats.averageScore}% 🎯",
-                            modifier = Modifier.weight(1f)
-                        )
+                        // 1. Streak Box
+                        Box(
+                            modifier = Modifier
+                                .weight(1f)
+                                .background(
+                                    color = if (activeDark) PremiumBorderColor.copy(alpha = 0.25f) else CardLight,
+                                    shape = RoundedCornerShape(16.dp)
+                                )
+                                .border(
+                                    width = 1.dp,
+                                    color = if (activeDark) PremiumBorderColor.copy(alpha = 0.4f) else SlateGrey.copy(alpha = 0.08f),
+                                    shape = RoundedCornerShape(16.dp)
+                                )
+                                .padding(vertical = 12.dp, horizontal = 4.dp),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            StatItem(
+                                label = Localization.getString("streak", lang),
+                                value = "${stats.dailyStreak} 🔥"
+                            )
+                        }
+
+                        // 2. Target Box (Specially refined with Premium Gold / Purple gradient background and distinct golden borders)
+                        Box(
+                            modifier = Modifier
+                                .weight(1.15f) // slightly wider to stand out
+                                .background(
+                                    brush = Brush.linearGradient(
+                                        colors = if (activeDark) {
+                                            listOf(PremiumGold.copy(alpha = 0.15f), PurpleGradStart.copy(alpha = 0.12f))
+                                        } else {
+                                            listOf(PremiumGold.copy(alpha = 0.18f), PurpleGradStart.copy(alpha = 0.08f))
+                                        }
+                                    ),
+                                    shape = RoundedCornerShape(16.dp)
+                                )
+                                .border(
+                                    width = 1.5.dp,
+                                    brush = Brush.linearGradient(
+                                        colors = listOf(PremiumGold, PremiumGoldDark)
+                                    ),
+                                    shape = RoundedCornerShape(16.dp)
+                                )
+                                .padding(vertical = 12.dp, horizontal = 4.dp),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            StatItem(
+                                label = Localization.getString("target", lang),
+                                value = "${stats.completedChapterCount}/8",
+                                subtitle = Localization.getString("chapters", lang)
+                            )
+                        }
+
+                        // 3. Avg Score Box
+                        Box(
+                            modifier = Modifier
+                                .weight(1f)
+                                .background(
+                                    color = if (activeDark) PremiumBorderColor.copy(alpha = 0.25f) else CardLight,
+                                    shape = RoundedCornerShape(16.dp)
+                                )
+                                .border(
+                                    width = 1.dp,
+                                    color = if (activeDark) PremiumBorderColor.copy(alpha = 0.4f) else SlateGrey.copy(alpha = 0.08f),
+                                    shape = RoundedCornerShape(16.dp)
+                                )
+                                .padding(vertical = 12.dp, horizontal = 4.dp),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            StatItem(
+                                label = Localization.getString("avg_score", lang),
+                                value = "${stats.averageScore}% 🎯"
+                            )
+                        }
                     }
                 }
             }
@@ -563,7 +661,7 @@ fun HomeScreen(
                     title = Localization.getString("flashcards", lang),
                     progress = 1.0f,
                     pctText = "5 Deck",
-                    icon = Icons.Default.Style,
+                    iconPainter = painterResource(id = com.example.R.drawable.ic_nav_flashcards),
                     modifier = Modifier.weight(1f),
                     onClick = onNavigateToFlashcards
                 )
@@ -571,7 +669,7 @@ fun HomeScreen(
                     title = Localization.getString("test_series", lang),
                     progress = (stats.averageScore.toFloat() / 100f).coerceIn(0f, 1f),
                     pctText = "${stats.averageScore}%",
-                    icon = Icons.Default.Assignment,
+                    iconPainter = painterResource(id = com.example.R.drawable.ic_nav_practice),
                     modifier = Modifier.weight(1f),
                     onClick = onNavigateToPractice
                 )
@@ -579,7 +677,7 @@ fun HomeScreen(
                     title = Localization.getString("study_progress", lang),
                     progress = (stats.completedChapterCount.toFloat() / 8f).coerceIn(0f, 1f),
                     pctText = "${((stats.completedChapterCount.toFloat() / 8f) * 100).roundToInt()}%",
-                    icon = Icons.Default.TrendingUp,
+                    iconPainter = painterResource(id = com.example.R.drawable.ic_progress_trend),
                     modifier = Modifier.weight(1f),
                     onClick = onNavigateToRead
                 )
@@ -607,7 +705,7 @@ fun HomeScreen(
                         horizontalArrangement = Arrangement.spacedBy(10.dp),
                         verticalAlignment = Alignment.CenterVertically
                     ) {
-                        Icon(imageVector = Icons.Default.MenuBook, contentDescription = "read mode", tint = PureWhite, modifier = Modifier.size(24.dp))
+                        Icon(painter = painterResource(id = com.example.R.drawable.ic_nav_study), contentDescription = "read mode", tint = PureWhite, modifier = Modifier.size(24.dp))
                         Text(
                             text = Localization.getString("read_mode", lang),
                             style = MaterialTheme.typography.titleMedium,
@@ -632,7 +730,7 @@ fun HomeScreen(
                         horizontalArrangement = Arrangement.spacedBy(10.dp),
                         verticalAlignment = Alignment.CenterVertically
                     ) {
-                        Icon(imageVector = Icons.Default.Quiz, contentDescription = "practice mode", tint = PureWhite, modifier = Modifier.size(24.dp))
+                        Icon(painter = painterResource(id = com.example.R.drawable.ic_nav_practice), contentDescription = "practice mode", tint = PureWhite, modifier = Modifier.size(24.dp))
                         Text(
                             text = Localization.getString("practice_mode", lang),
                             style = MaterialTheme.typography.titleMedium,
@@ -804,7 +902,7 @@ fun HomeDashboardRingCard(
     title: String,
     progress: Float,
     pctText: String,
-    icon: ImageVector,
+    iconPainter: androidx.compose.ui.graphics.painter.Painter,
     modifier: Modifier = Modifier,
     onClick: () -> Unit
 ) {
@@ -828,7 +926,7 @@ fun HomeDashboardRingCard(
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             Icon(
-                imageVector = icon,
+                painter = iconPainter,
                 contentDescription = title,
                 tint = PurpleGradStart,
                 modifier = Modifier.size(24.dp)
@@ -871,9 +969,14 @@ fun HomeDashboardRingCard(
 }
 
 @Composable
-fun StatItem(label: String, value: String, modifier: Modifier = Modifier) {
+fun StatItem(
+    label: String,
+    value: String,
+    modifier: Modifier = Modifier,
+    subtitle: String? = null
+) {
     Column(
-        modifier = modifier,
+        modifier = modifier.fillMaxWidth(),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Text(
@@ -882,6 +985,15 @@ fun StatItem(label: String, value: String, modifier: Modifier = Modifier) {
             fontWeight = FontWeight.Bold,
             color = PurpleGradStart
         )
+        subtitle?.let {
+            Text(
+                text = it,
+                style = MaterialTheme.typography.bodySmall,
+                fontWeight = FontWeight.SemiBold,
+                color = PremiumGold,
+                modifier = Modifier.padding(top = 2.dp)
+            )
+        }
         Spacer(modifier = Modifier.height(4.dp))
         Text(
             text = label,
@@ -963,6 +1075,9 @@ fun ReadModeScreen(
     val lang by viewModel.preferredLanguage.collectAsStateWithLifecycle()
     val completedChapters by viewModel.completedChapters.collectAsStateWithLifecycle()
     val unlockedChapters by viewModel.unlockedChapters.collectAsStateWithLifecycle()
+    val isSystemDark = isSystemInDarkTheme()
+    val darkModeVal by viewModel.darkModeFlow.collectAsStateWithLifecycle()
+    val activeDark = darkModeVal ?: isSystemDark
 
     var searchQuery by remember { mutableStateOf("") }
     var selectedFilter by remember { mutableStateOf("All") } // "All", "Part A", "Part B"
@@ -993,14 +1108,14 @@ fun ReadModeScreen(
                         Icon(imageVector = Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
                     }
                 },
-                colors = TopAppBarDefaults.topAppBarColors(containerColor = MaterialTheme.colorScheme.background)
+                colors = TopAppBarDefaults.topAppBarColors(containerColor = Color.Transparent)
             )
         }
     ) { innerPadding ->
         Box(
             modifier = Modifier
                 .fillMaxSize()
-                .background(MaterialTheme.colorScheme.background)
+                .premiumBackground(activeDark)
                 .padding(innerPadding)
         ) {
             Column(modifier = Modifier.fillMaxSize().padding(horizontal = 16.dp)) {
@@ -1397,6 +1512,8 @@ fun ReaderScreen(
     val context = LocalContext.current
     val lang by viewModel.preferredLanguage.collectAsStateWithLifecycle()
     val completedChapters by viewModel.completedChapters.collectAsStateWithLifecycle()
+    val bookmarks by viewModel.bookmarks.collectAsStateWithLifecycle()
+    val isBookmarked = bookmarks.any { it.id == "chapter_$chapterId" }
 
     // Kindle reader configurations
     val fontSize by viewModel.readerFontSize.collectAsStateWithLifecycle()
@@ -1457,7 +1574,12 @@ fun ReaderScreen(
                 },
                 navigationIcon = {
                     IconButton(onClick = onNavigateBack) {
-                        Icon(imageVector = Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back", tint = readerTextCol)
+                        Icon(
+                            painter = painterResource(id = com.example.R.drawable.ic_back_custom),
+                            contentDescription = "Back",
+                            tint = readerTextCol,
+                            modifier = Modifier.size(24.dp)
+                        )
                     }
                 },
                 actions = {
@@ -1470,10 +1592,20 @@ fun ReaderScreen(
                     IconButton(onClick = {
                         chapter?.let {
                             viewModel.toggleChapterBookmark(it)
-                            Toast.makeText(context, "Chapter Bookmarked!", Toast.LENGTH_SHORT).show()
+                            val msg = if (isBookmarked) "Bookmark Removed!" else "Chapter Bookmarked!"
+                            Toast.makeText(context, msg, Toast.LENGTH_SHORT).show()
                         }
                     }) {
-                        Icon(imageVector = Icons.Default.BookmarkBorder, contentDescription = "Bookmark", tint = readerTextCol)
+                        Icon(
+                            painter = if (isBookmarked) {
+                                painterResource(id = com.example.R.drawable.ic_bookmark_filled_custom)
+                            } else {
+                                painterResource(id = com.example.R.drawable.ic_bookmark_custom)
+                            },
+                            contentDescription = "Bookmark",
+                            tint = if (isBookmarked) PremiumGold else readerTextCol,
+                            modifier = Modifier.size(24.dp)
+                        )
                     }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(containerColor = readerBg)
@@ -1869,6 +2001,9 @@ fun PracticeModeScreen(
     val lang by viewModel.preferredLanguage.collectAsStateWithLifecycle()
     val unlockedTests by viewModel.unlockedTests.collectAsStateWithLifecycle()
     val scores by viewModel.scores.collectAsStateWithLifecycle()
+    val isSystemDark = isSystemInDarkTheme()
+    val darkModeVal by viewModel.darkModeFlow.collectAsStateWithLifecycle()
+    val activeDark = darkModeVal ?: isSystemDark
 
     var activeTab by remember { mutableStateOf("chapter_test") } // "chapter_test" or "mock_test"
     var showUnlockDialogByTestId by remember { mutableStateOf<String?>(null) }
@@ -1888,14 +2023,14 @@ fun PracticeModeScreen(
                         Icon(imageVector = Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
                     }
                 },
-                colors = TopAppBarDefaults.topAppBarColors(containerColor = MaterialTheme.colorScheme.background)
+                colors = TopAppBarDefaults.topAppBarColors(containerColor = Color.Transparent)
             )
         }
     ) { innerPadding ->
         Box(
             modifier = Modifier
                 .fillMaxSize()
-                .background(MaterialTheme.colorScheme.background)
+                .premiumBackground(activeDark)
                 .padding(innerPadding)
         ) {
             Column(modifier = Modifier.fillMaxSize().padding(horizontal = 16.dp)) {
@@ -2163,6 +2298,9 @@ fun TestInterfaceScreen(
     onNavigateBack: () -> Unit
 ) {
     val context = LocalContext.current
+    val isSystemDark = isSystemInDarkTheme()
+    val darkModeVal by viewModel.darkModeFlow.collectAsStateWithLifecycle()
+    val activeDark = darkModeVal ?: isSystemDark
     val coroutineScope = rememberCoroutineScope()
     val lang by viewModel.preferredLanguage.collectAsStateWithLifecycle()
     val testInfo by viewModel.activeTestInfo.collectAsStateWithLifecycle()
@@ -2175,6 +2313,9 @@ fun TestInterfaceScreen(
     var showSubmitConfirmation by remember { mutableStateOf(false) }
 
     val questionCount = questions.size
+    val bookmarks by viewModel.bookmarks.collectAsStateWithLifecycle()
+    val activeQuestion = questions.getOrNull(activeQuestionIdx)
+    val isQuestionBookmarked = activeQuestion?.let { q -> bookmarks.any { it.id == "q_${q.id}" } } ?: false
 
     Scaffold(
         topBar = {
@@ -2217,21 +2358,36 @@ fun TestInterfaceScreen(
                     IconButton(onClick = {
                         if (questions.isNotEmpty()) {
                             val activeQ = questions[activeQuestionIdx]
+                            val id = "q_${activeQ.id}"
                             coroutineScope.launch {
-                                viewModel.repository.saveBookmark(
-                                    id = "q_${activeQ.id}",
-                                    type = "question",
-                                    itemId = activeQ.id,
-                                    titleEn = activeQ.textEn,
-                                    titleHi = activeQ.textHi,
-                                    subtitleEn = "Question in Test ${testInfo?.titleEn}",
-                                    subtitleHi = "टेस्ट का प्रश्न ${testInfo?.titleHi}"
-                                )
-                                Toast.makeText(context, "Question Bookmarked!", Toast.LENGTH_SHORT).show()
+                                if (isQuestionBookmarked) {
+                                    viewModel.repository.removeBookmark(id)
+                                    Toast.makeText(context, "Bookmark Removed!", Toast.LENGTH_SHORT).show()
+                                } else {
+                                    viewModel.repository.saveBookmark(
+                                        id = id,
+                                        type = "question",
+                                        itemId = activeQ.id,
+                                        titleEn = activeQ.textEn,
+                                        titleHi = activeQ.textHi,
+                                        subtitleEn = "Question in Test ${testInfo?.titleEn}",
+                                        subtitleHi = "टेस्ट का प्रश्न ${testInfo?.titleHi}"
+                                    )
+                                    Toast.makeText(context, "Question Bookmarked!", Toast.LENGTH_SHORT).show()
+                                }
                             }
                         }
                     }) {
-                        Icon(imageVector = Icons.Default.BookmarkBorder, contentDescription = "Bookmark")
+                        Icon(
+                            painter = if (isQuestionBookmarked) {
+                                painterResource(id = com.example.R.drawable.ic_bookmark_filled_custom)
+                            } else {
+                                painterResource(id = com.example.R.drawable.ic_bookmark_custom)
+                            },
+                            contentDescription = "Bookmark",
+                            tint = if (isQuestionBookmarked) PremiumGold else MaterialTheme.colorScheme.onBackground,
+                            modifier = Modifier.size(24.dp)
+                        )
                     }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(containerColor = MaterialTheme.colorScheme.background)
@@ -2336,7 +2492,7 @@ fun TestInterfaceScreen(
         Box(
             modifier = Modifier
                 .fillMaxSize()
-                .background(MaterialTheme.colorScheme.background)
+                .premiumBackground(activeDark)
                 .padding(innerPadding)
         ) {
             if (questions.isNotEmpty()) {
@@ -2489,6 +2645,9 @@ fun ResultScreen(
     val lang by viewModel.preferredLanguage.collectAsStateWithLifecycle()
     val isPreparing by viewModel.isPreparingResult.collectAsStateWithLifecycle()
     val result by viewModel.lastTestResult.collectAsStateWithLifecycle()
+    val isSystemDark = isSystemInDarkTheme()
+    val darkModeVal by viewModel.darkModeFlow.collectAsStateWithLifecycle()
+    val activeDark = darkModeVal ?: isSystemDark
 
     var showExplsPanel by remember { mutableStateOf(false) }
 
@@ -2501,14 +2660,14 @@ fun ResultScreen(
                         Icon(imageVector = Icons.Default.Home, contentDescription = "Home")
                     }
                 },
-                colors = TopAppBarDefaults.topAppBarColors(containerColor = MaterialTheme.colorScheme.background)
+                colors = TopAppBarDefaults.topAppBarColors(containerColor = Color.Transparent)
             )
         }
     ) { innerPadding ->
         Box(
             modifier = Modifier
                 .fillMaxSize()
-                .background(MaterialTheme.colorScheme.background)
+                .premiumBackground(activeDark)
                 .padding(innerPadding)
         ) {
             if (isPreparing) {
@@ -2750,6 +2909,9 @@ fun FlashcardsScreen(
     val context = LocalContext.current
     val lang by viewModel.preferredLanguage.collectAsStateWithLifecycle()
     val flashcards by viewModel.flashcards.collectAsStateWithLifecycle()
+    val isSystemDark = isSystemInDarkTheme()
+    val darkModeVal by viewModel.darkModeFlow.collectAsStateWithLifecycle()
+    val activeDark = darkModeVal ?: isSystemDark
 
     var activeTab by remember { mutableStateOf("all") } // "all", "favorite"
     var activeCardIdx by remember { mutableIntStateOf(0) }
@@ -2782,14 +2944,14 @@ fun FlashcardsScreen(
                         Icon(imageVector = Icons.Default.Add, contentDescription = "Add custom card")
                     }
                 },
-                colors = TopAppBarDefaults.topAppBarColors(containerColor = MaterialTheme.colorScheme.background)
+                colors = TopAppBarDefaults.topAppBarColors(containerColor = Color.Transparent)
             )
         }
     ) { innerPadding ->
         Box(
             modifier = Modifier
                 .fillMaxSize()
-                .background(MaterialTheme.colorScheme.background)
+                .premiumBackground(activeDark)
                 .padding(innerPadding)
         ) {
             Column(
@@ -3041,6 +3203,9 @@ fun CMSManagerScreen(
 ) {
     val coroutineScope = rememberCoroutineScope()
     val lang by viewModel.preferredLanguage.collectAsStateWithLifecycle()
+    val isSystemDark = isSystemInDarkTheme()
+    val darkModeVal by viewModel.darkModeFlow.collectAsStateWithLifecycle()
+    val activeDark = darkModeVal ?: isSystemDark
     var isSyncing by remember { mutableStateOf(false) }
 
     Scaffold(
@@ -3052,14 +3217,14 @@ fun CMSManagerScreen(
                         Icon(imageVector = Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
                     }
                 },
-                colors = TopAppBarDefaults.topAppBarColors(containerColor = MaterialTheme.colorScheme.background)
+                colors = TopAppBarDefaults.topAppBarColors(containerColor = Color.Transparent)
             )
         }
     ) { innerPadding ->
         Box(
             modifier = Modifier
                 .fillMaxSize()
-                .background(MaterialTheme.colorScheme.background)
+                .premiumBackground(activeDark)
                 .padding(innerPadding)
         ) {
             Column(

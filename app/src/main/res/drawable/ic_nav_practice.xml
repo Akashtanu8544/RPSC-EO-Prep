@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="utf-8"?>
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:aapt="http://schemas.android.com/aapt"
+    android:width="24dp"
+    android:height="24dp"
+    android:viewportWidth="24"
+    android:viewportHeight="24">
+
+    <!-- Premium Shield Badge Container representing verification/tests -->
+    <path
+        android:pathData="M12,2 L4,5 L4,11 C4,16.5 7.4,21.6 12,23 C16.6,21.6 20,16.5 20,11 L20,5 Z"
+        android:strokeWidth="1.2">
+        <aapt:attr name="android:fillColor">
+            <gradient
+                android:startX="4"
+                android:startY="2"
+                android:endX="20"
+                android:endY="23"
+                android:type="linear">
+                <item
+                    android:color="#7B4DFF"
+                    android:offset="0.0" />
+                <item
+                    android:color="#211545"
+                    android:offset="1.0" />
+            </gradient>
+        </aapt:attr>
+        <aapt:attr name="android:strokeColor">
+            <gradient
+                android:startX="4"
+                android:startY="2"
+                android:endX="20"
+                android:endY="23"
+                android:type="linear">
+                <item
+                    android:color="#FFE082"
+                    android:offset="0.0" />
+                <item
+                    android:color="#D4AF37"
+                    android:offset="1.0" />
+            </gradient>
+        </aapt:attr>
+    </path>
+
+    <!-- Inner Golden Checkmark -->
+    <path
+        android:pathData="M8.5,11.5 L11,14 L15.5,9"
+        android:strokeWidth="2"
+        android:strokeColor="#FFD700"
+        android:strokeLineCap="round"
+        android:strokeLineJoin="round" />
+
+    <!-- Tiny decorative star representing high officer rank -->
+    <path
+        android:pathData="M12,4.5 L12.7,6 L14.2,6.1 L13.1,7.1 L13.4,8.5 L12,7.7 L10.6,8.5 L10.9,7.1 L9.8,6.1 L11.3,6 Z"
+        android:fillColor="#FFF9C4" />
+</vector>
