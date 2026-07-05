@@ -23,7 +23,9 @@ jobs:
           cache: 'gradle'
 
       - name: Grant Execute Permission to Gradlew
-        run: chmod +x gradlew
+        run: |
+          chmod +x gradlew
+          chmod +x gradle/wrapper/gradle-wrapper.jar
 
       - name: Run Unit Tests
         run: ./gradlew testDebugUnitTest --no-daemon
