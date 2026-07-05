@@ -1,0 +1,14 @@
+# Global line ending normalization
+* text=auto
+
+# Declare explicit binary paths to prevent Git from corrupting them
+*.jar binary
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.webp binary
+*.gif binary
+*.keystore binary
+*.jks binary
+*.apk binary
+*.aab binary
