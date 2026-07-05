@@ -1,6 +1,8 @@
 package com.example.presentation.ui
 
 import android.widget.Toast
+import android.content.Intent
+import android.net.Uri
 import androidx.compose.animation.*
 import androidx.compose.animation.core.*
 import androidx.compose.foundation.*
@@ -27,6 +29,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.draw.scale
+import androidx.compose.foundation.interaction.*
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
@@ -35,6 +39,7 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
@@ -115,14 +120,13 @@ fun OnboardingScreen(
                         .size(100.dp)
                         .shadow(16.dp, shape = RoundedCornerShape(24.dp))
                         .background(PremiumGradientBrush(), shape = RoundedCornerShape(24.dp))
-                        .padding(20.dp),
+                        .padding(14.dp),
                     contentAlignment = Alignment.Center
                 ) {
-                    Icon(
-                        imageVector = Icons.Default.AutoAwesome,
+                    Image(
+                        painter = painterResource(id = com.example.R.drawable.ic_app_logo),
                         contentDescription = "Logo icon",
-                        tint = PureWhite,
-                        modifier = Modifier.size(50.dp)
+                        modifier = Modifier.size(72.dp)
                     )
                 }
 
@@ -325,7 +329,7 @@ fun HomeScreen(
                 .verticalScroll(rememberScrollState())
                 .padding(16.dp)
         ) {
-            // 1. Premium Toolbar / Welcome Row
+            // 1. Premium Toolbar (Simply "RPSC EO Prep" and subtitle, no welcome/username)
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -335,11 +339,10 @@ fun HomeScreen(
             ) {
                 Column {
                     Text(
-                        text = "${Localization.getString("welcome", lang)}$userName",
+                        text = "RPSC EO Prep",
                         style = MaterialTheme.typography.headlineMedium,
-                        fontWeight = FontWeight.Bold,
-                        maxLines = 1,
-                        overflow = TextOverflow.Ellipsis
+                        fontWeight = FontWeight.ExtraBold,
+                        color = PurpleGradStart
                     )
                     Text(
                         text = Localization.getString("rpsc_subtitle", lang),
@@ -394,44 +397,164 @@ fun HomeScreen(
                 }
             }
 
-            Spacer(modifier = Modifier.height(12.dp))
+            Spacer(modifier = Modifier.height(8.dp))
 
-            // 2. Exam Live Countdown Ticker Card
+            // 2. Relocated Officer Performance Indexes (Displayed Above, has User Name)
             Card(
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(vertical = 8.dp)
-                    .shadow(12.dp, shape = RoundedCornerShape(24.dp)),
+                    .border(
+                        width = 1.dp,
+                        brush = Brush.linearGradient(
+                            colors = listOf(PremiumGold, Color.White.copy(alpha = 0.2f))
+                        ),
+                        shape = RoundedCornerShape(24.dp)
+                    ),
                 shape = RoundedCornerShape(24.dp),
-                colors = CardDefaults.cardColors(containerColor = SlateGrey)
+                colors = CardDefaults.cardColors(
+                    containerColor = MaterialTheme.colorScheme.surface.copy(alpha = 0.45f)
+                )
             ) {
-                Column(
-                    modifier = Modifier.padding(20.dp),
-                    horizontalAlignment = Alignment.CenterHorizontally
-                ) {
-                    Text(
-                        text = Localization.getString("exam_countdown", lang),
-                        style = MaterialTheme.typography.titleMedium,
-                        color = PureWhite,
-                        fontWeight = FontWeight.Bold
+                Column(modifier = Modifier.padding(20.dp)) {
+                    // Officer Profile Info Row
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(12.dp),
+                        modifier = Modifier.padding(bottom = 12.dp)
+                    ) {
+                        Box(
+                            modifier = Modifier
+                                .size(44.dp)
+                                .background(
+                                    brush = Brush.radialGradient(
+                                        colors = listOf(PremiumGold, PremiumGoldDark)
+                                    ),
+                                    shape = CircleShape
+                                ),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.ManageAccounts,
+                                contentDescription = "Officer Profile",
+                                tint = PureWhite,
+                                modifier = Modifier.size(22.dp)
+                            )
+                        }
+                        Column {
+                            Text(
+                                text = userName,
+                                style = MaterialTheme.typography.titleMedium,
+                                fontWeight = FontWeight.Bold,
+                                color = MaterialTheme.colorScheme.onBackground
+                            )
+                            Text(
+                                text = "Officer Performance Indexes",
+                                style = MaterialTheme.typography.labelSmall,
+                                fontWeight = FontWeight.SemiBold,
+                                color = PremiumGold
+                            )
+                        }
+                    }
+
+                    HorizontalDivider(
+                        color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.08f),
+                        modifier = Modifier.padding(bottom = 12.dp)
                     )
-                    Spacer(modifier = Modifier.height(16.dp))
 
                     Row(
                         modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.SpaceAround
+                        horizontalArrangement = Arrangement.SpaceBetween
                     ) {
-                        CountdownCircle(value = countdown.days, label = Localization.getString("days", lang))
-                        CountdownCircle(value = countdown.hours, label = Localization.getString("hours", lang))
-                        CountdownCircle(value = countdown.minutes, label = Localization.getString("minutes", lang))
-                        CountdownCircle(value = countdown.seconds, label = Localization.getString("seconds", lang))
+                        StatItem(
+                            label = Localization.getString("streak", lang),
+                            value = "${stats.dailyStreak} 🔥",
+                            modifier = Modifier.weight(1f)
+                        )
+                        StatItem(
+                            label = Localization.getString("target", lang),
+                            value = "${stats.completedChapterCount}/8 ${Localization.getString("chapters", lang)}",
+                            modifier = Modifier.weight(1f)
+                        )
+                        StatItem(
+                            label = Localization.getString("avg_score", lang),
+                            value = "${stats.averageScore}% 🎯",
+                            modifier = Modifier.weight(1f)
+                        )
                     }
                 }
             }
 
-            Spacer(modifier = Modifier.height(16.dp))
+            // 3. Minimalist horizontal pill-shaped countdown indicator
+            val totalDaysRange = 100f
+            val remainingDays = countdown.days.toFloat().coerceIn(0f, totalDaysRange)
+            val proximityProgress = ((totalDaysRange - remainingDays) / totalDaysRange).coerceIn(0f, 1f)
 
-            // 3. Quick stats cards (Flashcards, test series, study progress)
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(38.dp)
+                    .background(
+                        color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.04f),
+                        shape = CircleShape
+                    )
+                    .clip(CircleShape),
+                contentAlignment = Alignment.CenterStart
+            ) {
+                // Subtle progress-bar background indicating proximity to the exam date
+                Box(
+                    modifier = Modifier
+                        .fillMaxHeight()
+                        .fillMaxWidth(proximityProgress)
+                        .background(
+                            brush = Brush.horizontalGradient(
+                                colors = listOf(
+                                    PurpleGradStart.copy(alpha = 0.15f),
+                                    PurpleGradEnd.copy(alpha = 0.15f)
+                                )
+                            )
+                        )
+                )
+
+                Row(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(horizontal = 16.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.SpaceBetween
+                ) {
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(6.dp)
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.CalendarMonth,
+                            contentDescription = "Days Left",
+                            tint = PurpleGradStart,
+                            modifier = Modifier.size(14.dp)
+                        )
+                        Text(
+                            text = "RPSC EO/RO Exam Proximity",
+                            style = MaterialTheme.typography.bodySmall,
+                            fontWeight = FontWeight.ExtraLight,
+                            color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.6f)
+                        )
+                    }
+
+                    Text(
+                        text = "${countdown.days}d ${countdown.hours}h Remaining",
+                        style = MaterialTheme.typography.bodySmall.copy(
+                            fontWeight = FontWeight.W300,
+                            letterSpacing = 0.5.sp
+                        ),
+                        color = MaterialTheme.colorScheme.onBackground
+                    )
+                }
+            }
+
+            Spacer(modifier = Modifier.height(12.dp))
+
+            // 4. Quick stats cards (Flashcards, test series, study progress)
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.spacedBy(10.dp)
@@ -462,9 +585,9 @@ fun HomeScreen(
                 )
             }
 
-            Spacer(modifier = Modifier.height(24.dp))
+            Spacer(modifier = Modifier.height(20.dp))
 
-            // 4. Two Primary Navigation Buttons (Read Mode & Practice Mode)
+            // 5. Two Primary Navigation Buttons (Read Mode & Practice Mode)
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.spacedBy(16.dp)
@@ -475,7 +598,7 @@ fun HomeScreen(
                     modifier = Modifier
                         .weight(1f)
                         .height(68.dp)
-                        .shadow(12.dp, shape = RoundedCornerShape(20.dp))
+                        .shadow(8.dp, shape = RoundedCornerShape(20.dp))
                         .testTag("home_read_btn"),
                     shape = RoundedCornerShape(20.dp),
                     colors = ButtonDefaults.buttonColors(containerColor = PurpleGradStart)
@@ -500,7 +623,7 @@ fun HomeScreen(
                     modifier = Modifier
                         .weight(1f)
                         .height(68.dp)
-                        .shadow(12.dp, shape = RoundedCornerShape(20.dp))
+                        .shadow(8.dp, shape = RoundedCornerShape(20.dp))
                         .testTag("home_practice_btn"),
                     shape = RoundedCornerShape(20.dp),
                     colors = ButtonDefaults.buttonColors(containerColor = PurpleGradEnd)
@@ -522,50 +645,132 @@ fun HomeScreen(
 
             Spacer(modifier = Modifier.height(24.dp))
 
-            // 5. Daily Streak Metrics
-            Card(
+            // 6. Connect with Officer Community (Social Networks)
+            Text(
+                text = "Connect with Officer Community",
+                style = MaterialTheme.typography.titleSmall,
+                fontWeight = FontWeight.Bold,
+                color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.6f),
+                modifier = Modifier.padding(bottom = 12.dp)
+            )
+
+            Row(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(vertical = 8.dp),
-                shape = RoundedCornerShape(24.dp),
-                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant)
+                    .padding(bottom = 16.dp),
+                horizontalArrangement = Arrangement.SpaceEvenly,
+                verticalAlignment = Alignment.CenterVertically
             ) {
-                Column(modifier = Modifier.padding(20.dp)) {
-                    Text(
-                        text = "Officer Performance Indexes",
-                        style = MaterialTheme.typography.titleMedium,
-                        fontWeight = FontWeight.Bold
-                    )
-                    Spacer(modifier = Modifier.height(16.dp))
-
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.SpaceBetween
-                    ) {
-                        StatItem(
-                            label = Localization.getString("streak", lang),
-                            value = "${stats.dailyStreak} 🔥",
-                            modifier = Modifier.weight(1f)
-                        )
-                        StatItem(
-                            label = Localization.getString("target", lang),
-                            value = "${stats.completedChapterCount}/8 ${Localization.getString("chapters", lang)}",
-                            modifier = Modifier.weight(1f)
-                        )
-                        StatItem(
-                            label = Localization.getString("avg_score", lang),
-                            value = "${stats.averageScore}% 🎯",
-                            modifier = Modifier.weight(1f)
-                        )
+                // Telegram
+                SocialLinkIcon(
+                    icon = Icons.Default.Send,
+                    label = "Telegram",
+                    color = SocialTelegram,
+                    onClick = {
+                        val intent = Intent(Intent.ACTION_VIEW, Uri.parse("https://t.me/RPSC_EO_Prep"))
+                        context.startActivity(intent)
                     }
-                }
+                )
+
+                // YouTube
+                SocialLinkIcon(
+                    icon = Icons.Default.PlayArrow,
+                    label = "YouTube",
+                    color = SocialYouTube,
+                    onClick = {
+                        val intent = Intent(Intent.ACTION_VIEW, Uri.parse("https://youtube.com/@RPSC_EO_Prep"))
+                        context.startActivity(intent)
+                    }
+                )
+
+                // Twitter / X
+                SocialLinkIcon(
+                    icon = Icons.Default.Public,
+                    label = "Twitter / X",
+                    color = SocialTwitter,
+                    onClick = {
+                        val intent = Intent(Intent.ACTION_VIEW, Uri.parse("https://twitter.com/RPSC_EO_Prep"))
+                        context.startActivity(intent)
+                    }
+                )
+
+                // Instagram
+                SocialLinkIcon(
+                    icon = Icons.Default.PhotoCamera,
+                    label = "Instagram",
+                    color = SocialInstagram,
+                    onClick = {
+                        val intent = Intent(Intent.ACTION_VIEW, Uri.parse("https://instagram.com/RPSC_EO_Prep"))
+                        context.startActivity(intent)
+                    }
+                )
+
+                // WhatsApp
+                SocialLinkIcon(
+                    icon = Icons.Default.Chat,
+                    label = "WhatsApp",
+                    color = SocialWhatsApp,
+                    onClick = {
+                        val intent = Intent(Intent.ACTION_VIEW, Uri.parse("https://wa.me/919876543210"))
+                        context.startActivity(intent)
+                    }
+                )
             }
 
             Spacer(modifier = Modifier.height(12.dp))
 
-            // 6. AdMob Native Ad Container (Integrated beautifully and unobtrusively)
+            // 7. Beautifully integrated Native Ad
             AdMobNativeAdPlaceholder(lang = lang)
         }
+    }
+}
+
+@Composable
+fun SocialLinkIcon(
+    icon: ImageVector,
+    label: String,
+    color: Color,
+    onClick: () -> Unit
+) {
+    val interactionSource = remember { MutableInteractionSource() }
+    val isPressed by interactionSource.collectIsPressedAsState()
+    val isHovered by interactionSource.collectIsHoveredAsState()
+
+    val scale by animateFloatAsState(
+        targetValue = if (isPressed) 0.92f else if (isHovered) 1.12f else 1.0f,
+        animationSpec = spring(
+            dampingRatio = Spring.DampingRatioMediumBouncy,
+            stiffness = Spring.StiffnessLow
+        ),
+        label = "scaleAnimation"
+    )
+
+    Column(
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.spacedBy(4.dp)
+    ) {
+        IconButton(
+            onClick = onClick,
+            interactionSource = interactionSource,
+            modifier = Modifier
+                .size(52.dp)
+                .scale(scale)
+                .background(color.copy(alpha = 0.12f), shape = CircleShape)
+                .border(1.dp, color.copy(alpha = 0.3f), shape = CircleShape)
+        ) {
+            Icon(
+                imageVector = icon,
+                contentDescription = label,
+                tint = color,
+                modifier = Modifier.size(24.dp)
+            )
+        }
+        Text(
+            text = label,
+            fontSize = 9.sp,
+            fontWeight = FontWeight.SemiBold,
+            color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.6f)
+        )
     }
 }
 
@@ -605,10 +810,16 @@ fun HomeDashboardRingCard(
 ) {
     Card(
         modifier = modifier
-            .shadow(4.dp, shape = RoundedCornerShape(20.dp))
+            .shadow(6.dp, shape = RoundedCornerShape(22.dp))
             .clickable(onClick = onClick),
-        shape = RoundedCornerShape(20.dp),
-        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant)
+        shape = RoundedCornerShape(22.dp),
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.surface.copy(alpha = 0.55f)
+        ),
+        border = BorderStroke(
+            width = 1.dp,
+            color = Color.White.copy(alpha = 0.12f)
+        )
     ) {
         Column(
             modifier = Modifier
@@ -745,7 +956,7 @@ fun AdMobNativeAdPlaceholder(lang: String) {
 fun ReadModeScreen(
     viewModel: AppViewModel,
     onNavigateBack: () -> Unit,
-    onNavigateToReader: (String) -> Unit
+    onNavigateToReader: (String, Int) -> Unit
 ) {
     val context = LocalContext.current
     val coroutineScope = rememberCoroutineScope()
@@ -760,6 +971,11 @@ fun ReadModeScreen(
     // Dialog state for premium rewarded ad simulation
     var showUnlockDialogByChapterId by remember { mutableStateOf<String?>(null) }
     var isSimulatingAdVideo by remember { mutableStateOf(false) }
+
+    // Nested dropdown states for chapters and subtopics content
+    var expandedChapterId by remember { mutableStateOf<String?>(null) }
+    var expandedSubtopicIndex by remember { mutableStateOf<Int?>(null) }
+    val chapterContents = remember { mutableStateMapOf<String, ChapterContent?>() }
 
     val books = viewModel.repository.getBooks().filter {
         val matchesQuery = it.titleEn.contains(searchQuery, ignoreCase = true) ||
@@ -934,89 +1150,177 @@ fun ReadModeScreen(
                                         modifier = Modifier
                                             .background(MaterialTheme.colorScheme.background.copy(alpha = 0.4f))
                                             .padding(vertical = 8.dp)
-                                    ) {
-                                        HorizontalDivider(color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.05f))
-                                        chapters.forEach { chapter ->
+                                     ) {
+                                         HorizontalDivider(color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.05f))
+                                         chapters.forEach { chapter ->
                                             val isCompleted = completedChapters.any { it.chapterId == chapter.id }
                                             val isChapterFree = chapter.orderIndex <= 2 // First 2 chapters are free
                                             val isUnlocked = isChapterFree || unlockedChapters.any { it.chapterId == chapter.id }
                                             val isDownloaded by viewModel.repository.isChapterDownloaded(chapter.id).collectAsStateWithLifecycle(initialValue = false)
 
-                                            Row(
-                                                modifier = Modifier
-                                                    .fillMaxWidth()
-                                                    .clickable {
-                                                        if (isUnlocked) {
-                                                            onNavigateToReader(chapter.id)
-                                                        } else {
-                                                            showUnlockDialogByChapterId = chapter.id
+                                            Column(modifier = Modifier.fillMaxWidth()) {
+                                                Row(
+                                                    modifier = Modifier
+                                                        .fillMaxWidth()
+                                                        .clickable {
+                                                            if (isUnlocked) {
+                                                                if (expandedChapterId == chapter.id) {
+                                                                    expandedChapterId = null
+                                                                    expandedSubtopicIndex = null
+                                                                } else {
+                                                                    expandedChapterId = chapter.id
+                                                                    expandedSubtopicIndex = null
+                                                                    if (!chapterContents.containsKey(chapter.id)) {
+                                                                        coroutineScope.launch {
+                                                                            chapterContents[chapter.id] = viewModel.repository.getChapterContent(chapter.id)
+                                                                        }
+                                                                    }
+                                                                }
+                                                            } else {
+                                                                showUnlockDialogByChapterId = chapter.id
+                                                            }
                                                         }
+                                                        .padding(horizontal = 16.dp, vertical = 12.dp),
+                                                    verticalAlignment = Alignment.CenterVertically,
+                                                    horizontalArrangement = Arrangement.SpaceBetween
+                                                ) {
+                                                    Column(modifier = Modifier.weight(1f)) {
+                                                        Row(
+                                                            verticalAlignment = Alignment.CenterVertically,
+                                                            horizontalArrangement = Arrangement.spacedBy(8.dp)
+                                                        ) {
+                                                            if (isCompleted) {
+                                                                Icon(
+                                                                    imageVector = Icons.Default.CheckCircle,
+                                                                    contentDescription = "completed",
+                                                                    tint = SuccessColor,
+                                                                    modifier = Modifier.size(16.dp)
+                                                                )
+                                                            }
+                                                            Text(
+                                                                text = if (lang == "hi") chapter.titleHi else chapter.titleEn,
+                                                                style = MaterialTheme.typography.bodyLarge,
+                                                                fontWeight = FontWeight.Bold,
+                                                                color = if (isUnlocked) MaterialTheme.colorScheme.onBackground else MaterialTheme.colorScheme.onBackground.copy(alpha = 0.5f)
+                                                            )
+                                                        }
+                                                        Spacer(modifier = Modifier.height(4.dp))
+                                                        Text(
+                                                            text = "${Localization.getString("reading_time", lang)} ${chapter.estimatedReadingTime}",
+                                                            style = MaterialTheme.typography.labelSmall,
+                                                            color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.4f)
+                                                        )
                                                     }
-                                                    .padding(horizontal = 16.dp, vertical = 12.dp),
-                                                verticalAlignment = Alignment.CenterVertically,
-                                                horizontalArrangement = Arrangement.SpaceBetween
-                                            ) {
-                                                Column(modifier = Modifier.weight(1f)) {
+
+                                                    // Action buttons
                                                     Row(
                                                         verticalAlignment = Alignment.CenterVertically,
-                                                        horizontalArrangement = Arrangement.spacedBy(8.dp)
+                                                        horizontalArrangement = Arrangement.spacedBy(10.dp)
                                                     ) {
-                                                        if (isCompleted) {
+                                                        // Download offline icon
+                                                        IconButton(
+                                                            onClick = { viewModel.toggleChapterDownload(chapter.id) },
+                                                            modifier = Modifier.size(36.dp)
+                                                        ) {
                                                             Icon(
-                                                                imageVector = Icons.Default.CheckCircle,
-                                                                contentDescription = "completed",
-                                                                tint = SuccessColor,
-                                                                modifier = Modifier.size(16.dp)
+                                                                imageVector = if (isDownloaded) Icons.Default.CloudDone else Icons.Default.CloudDownload,
+                                                                contentDescription = "download",
+                                                                tint = if (isDownloaded) SuccessColor else PurpleGradStart.copy(alpha = 0.6f),
+                                                                modifier = Modifier.size(20.dp)
                                                             )
                                                         }
-                                                        Text(
-                                                            text = if (lang == "hi") chapter.titleHi else chapter.titleEn,
-                                                            style = MaterialTheme.typography.bodyLarge,
-                                                            fontWeight = FontWeight.Bold,
-                                                            color = if (isUnlocked) MaterialTheme.colorScheme.onBackground else MaterialTheme.colorScheme.onBackground.copy(alpha = 0.5f)
-                                                        )
+
+                                                        // Unlock status Badge
+                                                        Box(
+                                                            modifier = Modifier
+                                                                .background(
+                                                                    color = if (isUnlocked) SuccessColor.copy(alpha = 0.1f) else WarningColor.copy(alpha = 0.1f),
+                                                                    shape = RoundedCornerShape(6.dp)
+                                                                )
+                                                                .padding(horizontal = 8.dp, vertical = 4.dp)
+                                                        ) {
+                                                            Text(
+                                                                text = if (isUnlocked) Localization.getString("free_badge", lang) else Localization.getString("pro_badge", lang),
+                                                                fontSize = 10.sp,
+                                                                fontWeight = FontWeight.Bold,
+                                                                color = if (isUnlocked) SuccessColor else WarningColor
+                                                            )
+                                                        }
+
+                                                        if (isUnlocked) {
+                                                            Icon(
+                                                                imageVector = if (expandedChapterId == chapter.id) Icons.Default.ExpandLess else Icons.Default.ExpandMore,
+                                                                contentDescription = "Expand chapter",
+                                                                tint = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.5f),
+                                                                modifier = Modifier.size(18.dp)
+                                                            )
+                                                        }
                                                     }
-                                                    Spacer(modifier = Modifier.height(4.dp))
-                                                    Text(
-                                                        text = "${Localization.getString("reading_time", lang)} ${chapter.estimatedReadingTime}",
-                                                        style = MaterialTheme.typography.labelSmall,
-                                                        color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.4f)
-                                                    )
                                                 }
 
-                                                // Action buttons
-                                                Row(
-                                                    verticalAlignment = Alignment.CenterVertically,
-                                                    horizontalArrangement = Arrangement.spacedBy(10.dp)
+                                                // Subtopics & content accordion dropdown
+                                                AnimatedVisibility(
+                                                    visible = expandedChapterId == chapter.id,
+                                                    enter = expandVertically() + fadeIn(),
+                                                    exit = shrinkVertically() + fadeOut()
                                                 ) {
-                                                    // Download offline icon
-                                                    IconButton(
-                                                        onClick = { viewModel.toggleChapterDownload(chapter.id) },
-                                                        modifier = Modifier.size(36.dp)
-                                                    ) {
-                                                        Icon(
-                                                            imageVector = if (isDownloaded) Icons.Default.CloudDone else Icons.Default.CloudDownload,
-                                                            contentDescription = "download",
-                                                            tint = if (isDownloaded) SuccessColor else PurpleGradStart.copy(alpha = 0.6f),
-                                                            modifier = Modifier.size(20.dp)
-                                                        )
-                                                    }
-
-                                                    // Unlock status Badge
-                                                    Box(
+                                                    val subtopicsList = if (lang == "hi") chapter.subtopicsHi else chapter.subtopicsEn
+                                                    Column(
                                                         modifier = Modifier
-                                                            .background(
-                                                                color = if (isUnlocked) SuccessColor.copy(alpha = 0.1f) else WarningColor.copy(alpha = 0.1f),
-                                                                shape = RoundedCornerShape(6.dp)
-                                                            )
-                                                            .padding(horizontal = 8.dp, vertical = 4.dp)
+                                                            .fillMaxWidth()
+                                                            .padding(start = 24.dp, end = 16.dp, top = 4.dp, bottom = 12.dp),
+                                                        verticalArrangement = Arrangement.spacedBy(8.dp)
                                                     ) {
-                                                        Text(
-                                                            text = if (isUnlocked) Localization.getString("free_badge", lang) else Localization.getString("pro_badge", lang),
-                                                            fontSize = 10.sp,
-                                                            fontWeight = FontWeight.Bold,
-                                                            color = if (isUnlocked) SuccessColor else WarningColor
-                                                        )
+                                                        subtopicsList.forEachIndexed { subIdx, subTitle ->
+                                                            Card(
+                                                                modifier = Modifier
+                                                                    .fillMaxWidth()
+                                                                    .clickable {
+                                                                        onNavigateToReader(chapter.id, subIdx)
+                                                                    },
+                                                                shape = RoundedCornerShape(12.dp),
+                                                                colors = CardDefaults.cardColors(
+                                                                    containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.4f)
+                                                                ),
+                                                                border = BorderStroke(
+                                                                    width = 1.dp,
+                                                                    color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.05f)
+                                                                )
+                                                            ) {
+                                                                Row(
+                                                                    modifier = Modifier
+                                                                        .fillMaxWidth()
+                                                                        .padding(horizontal = 14.dp, vertical = 12.dp),
+                                                                    verticalAlignment = Alignment.CenterVertically,
+                                                                    horizontalArrangement = Arrangement.SpaceBetween
+                                                                ) {
+                                                                    Row(
+                                                                        verticalAlignment = Alignment.CenterVertically,
+                                                                        horizontalArrangement = Arrangement.spacedBy(8.dp),
+                                                                        modifier = Modifier.weight(1f)
+                                                                    ) {
+                                                                        Icon(
+                                                                            imageVector = Icons.Default.Subject,
+                                                                            contentDescription = "Subtopic",
+                                                                            tint = PurpleGradStart,
+                                                                            modifier = Modifier.size(16.dp)
+                                                                        )
+                                                                        Text(
+                                                                            text = subTitle,
+                                                                            style = MaterialTheme.typography.bodyMedium,
+                                                                            fontWeight = FontWeight.Bold,
+                                                                            color = MaterialTheme.colorScheme.onBackground
+                                                                        )
+                                                                    }
+                                                                    Icon(
+                                                                        imageVector = Icons.AutoMirrored.Default.ArrowForward,
+                                                                        contentDescription = "Open subtopic",
+                                                                        tint = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.5f),
+                                                                        modifier = Modifier.size(18.dp)
+                                                                    )
+                                                                }
+                                                            }
+                                                        }
                                                     }
                                                 }
                                             }
@@ -1086,6 +1390,7 @@ fun ReadModeScreen(
 @Composable
 fun ReaderScreen(
     chapterId: String,
+    initialPage: Int = 0,
     viewModel: AppViewModel,
     onNavigateBack: () -> Unit
 ) {
@@ -1100,7 +1405,7 @@ fun ReaderScreen(
     val fontFamilyName by viewModel.readerFontFamily.collectAsStateWithLifecycle()
 
     var chapterContent by remember { mutableStateOf<ChapterContent?>(null) }
-    var activePageIdx by remember { mutableIntStateOf(0) }
+    var activePageIdx by remember { mutableIntStateOf(initialPage) }
     var showSettingsPanel by remember { mutableStateOf(false) }
 
     // Highlight / Notes state

@@ -25,6 +25,11 @@ class AppViewModel(application: Application) : AndroidViewModel(application) {
     private val appDao = database.appDao()
     val repository = ExamRepository(appDao, application)
     private val prefs = UserPreferencesRepository(application)
+    private val contentVersionManager = com.example.data.repository.ContentVersionManager(appDao, application)
+
+    // Sync status Flow
+    private val _syncStatus = MutableStateFlow("Idle")
+    val syncStatus = _syncStatus.asStateFlow()
 
     // User preferences
     val userName = prefs.userNameFlow.stateIn(viewModelScope, SharingStarted.Eagerly, "")
@@ -96,8 +101,17 @@ class AppViewModel(application: Application) : AndroidViewModel(application) {
         viewModelScope.launch {
             repository.seedInitialDataIfNeeded()
             repository.clearExpiredFlashcards()
+            triggerContentSync()
         }
         startCountdownTicker()
+    }
+
+    fun triggerContentSync() {
+        viewModelScope.launch {
+            contentVersionManager.checkAndSyncContent { status ->
+                _syncStatus.value = status
+            }
+        }
     }
 
     // Onboarding handlers

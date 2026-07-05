@@ -23,6 +23,20 @@ val AccentBlue = Color(0xFFBFDBFE)   // Blue highlight
 val AccentGreen = Color(0xFFBCF0DA)  // Green highlight
 val AccentPink = Color(0xFFFBCFE8)   // Pink highlight
 
+// Premium Obsidian & Gold Palette
+val PremiumGold = Color(0xFFD4AF37)
+val PremiumGoldDark = Color(0xFFAA7C11)
+val PremiumObsidian = Color(0xFF0F1016)
+val PremiumCardBg = Color(0xFF171923)
+val PremiumBorderColor = Color(0xFF2E3142)
+
+// Social Brand Colors
+val SocialTelegram = Color(0xFF0088CC)
+val SocialYouTube = Color(0xFFFF0000)
+val SocialTwitter = Color(0xFF1DA1F2)
+val SocialInstagram = Color(0xFFE1306C)
+val SocialWhatsApp = Color(0xFF25D366)
+
 // Semantic States
 val SuccessColor = Color(0xFF10B981)
 val WarningColor = Color(0xFFF59E0B)

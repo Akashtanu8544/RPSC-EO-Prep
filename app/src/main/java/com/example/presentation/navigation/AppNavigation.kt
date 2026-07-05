@@ -64,19 +64,24 @@ fun AppNavigation(
             ReadModeScreen(
                 viewModel = viewModel,
                 onNavigateBack = { navController.popBackStack() },
-                onNavigateToReader = { chapterId ->
-                    navController.navigate(Routes.readerRoute(chapterId))
+                onNavigateToReader = { chapterId, pageIdx ->
+                    navController.navigate("reader/$chapterId?page=$pageIdx")
                 }
             )
         }
 
         composable(
-            route = Routes.READER,
-            arguments = listOf(navArgument("chapterId") { type = NavType.StringType })
+            route = "reader/{chapterId}?page={page}",
+            arguments = listOf(
+                navArgument("chapterId") { type = NavType.StringType },
+                navArgument("page") { type = NavType.IntType; defaultValue = 0 }
+            )
         ) { backStackEntry ->
             val chapterId = backStackEntry.arguments?.getString("chapterId") ?: ""
+            val page = backStackEntry.arguments?.getInt("page") ?: 0
             ReaderScreen(
                 chapterId = chapterId,
+                initialPage = page,
                 viewModel = viewModel,
                 onNavigateBack = { navController.popBackStack() }
             )

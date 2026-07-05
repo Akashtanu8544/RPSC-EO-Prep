@@ -145,3 +145,11 @@ data class StudyStats(
     val mockTestsAttempted: Int = 0,
     val wrongQuestionsCount: Int = 0
 )
+
+@Entity(tableName = "content_version")
+data class ContentVersionEntity(
+    @PrimaryKey val id: String = "manifest_version",
+    val version: Int,
+    val lastChecked: Long = System.currentTimeMillis()
+)
+

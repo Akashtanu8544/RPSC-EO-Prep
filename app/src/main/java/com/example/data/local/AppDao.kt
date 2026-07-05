@@ -107,4 +107,11 @@ interface AppDao {
 
     @Query("DELETE FROM flashcards WHERE isDaily = 1 AND expiryTime < :currentTime")
     suspend fun clearExpiredDailyFlashcards(currentTime: Long)
+
+    // Content Version
+    @Query("SELECT * FROM content_version WHERE id = 'manifest_version' LIMIT 1")
+    suspend fun getContentVersion(): ContentVersionEntity?
+
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun insertContentVersion(entity: ContentVersionEntity)
 }

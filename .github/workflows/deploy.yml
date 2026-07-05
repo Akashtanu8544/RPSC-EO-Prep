@@ -1,0 +1,63 @@
+name: Android CI/CD Build and Release
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  build:
+    name: Run Unit Tests & Build Release AAB
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'zulu'
+          java-version: '17'
+          cache: 'gradle'
+
+      - name: Make Gradlew Executable
+        run: chmod +x gradlew
+
+      # Run unit tests (including ContentVersionManager, Room Database, and examples)
+      - name: Run Unit Tests
+        run: ./gradlew :app:testDebugUnitTest --no-daemon
+
+      # Decode release keystore if RELEASE_KEYSTORE_BASE64 secret is provided.
+      # If no secret is set, it can fall back to using a debug keystore or skip signing to prevent failure during initial setup.
+      - name: Decode Release Keystore
+        id: decode_keystore
+        run: |
+          if [ -n "${{ secrets.RELEASE_KEYSTORE_BASE64 }}" ]; then
+            echo "Decoding release keystore from base64..."
+            echo "${{ secrets.RELEASE_KEYSTORE_BASE64 }}" | base64 --decode > my-upload-key.jks
+            echo "has_keystore=true" >> $GITHUB_OUTPUT
+          else
+            echo "No RELEASE_KEYSTORE_BASE64 secret found. Release AAB will be built unsigned or signed using debug keys depending on Gradle configuration."
+            echo "has_keystore=false" >> $GITHUB_OUTPUT
+          fi
+
+      # Build the signed/unsigned Android App Bundle (AAB)
+      - name: Build Release Bundle (AAB)
+        run: ./gradlew :app:bundleRelease --no-daemon
+        env:
+          KEYSTORE_PATH: ${{ steps.decode_keystore.outputs.has_keystore == 'true' && 'my-upload-key.jks' || '' }}
+          STORE_PASSWORD: ${{ secrets.STORE_PASSWORD }}
+          KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
+
+      # Upload the built Android App Bundle artifact
+      - name: Upload Release AAB Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: release-app-bundle
+          path: app/build/outputs/bundle/release/app-release.aab
+          if-no-files-found: error
+          retention-days: 7

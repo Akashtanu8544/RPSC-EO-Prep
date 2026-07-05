@@ -15,9 +15,10 @@ import com.example.data.model.*
         HighlightEntity::class,
         ScoreEntity::class,
         DownloadedChapterEntity::class,
-        FlashcardEntity::class
+        FlashcardEntity::class,
+        ContentVersionEntity::class
     ],
-    version = 1,
+    version = 2,
     exportSchema = false
 )
 abstract class AppDatabase : RoomDatabase() {
