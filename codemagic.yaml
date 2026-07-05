@@ -1,0 +1,66 @@
+workflows:
+  android-build:
+    name: Android Build & Release
+    max_build_duration: 60
+    instance_type: linux_x2
+    environment:
+      groups:
+        - keystore_credentials # Define this in your Codemagic dashboard if you have actual keys
+      vars:
+        KEYSTORE_PATH: "$FCI_BUILD_DIR/my-upload-key.jks"
+      java: 21
+    triggering:
+      events:
+        - push
+        - pull_request
+      branch_patterns:
+        - pattern: 'main'
+        - pattern: 'master'
+    scripts:
+      - name: Generate local.properties
+        script: |
+          echo "sdk.dir=$ANDROID_SDK_ROOT" > local.properties
+      - name: Grant permissions to Gradle
+        script: |
+          chmod +x gradlew
+          chmod +x gradle/wrapper/gradle-wrapper.jar
+      - name: Configure Keystore
+        script: |
+          if [ -n "$RELEASE_KEYSTORE_BASE64" ]; then
+            echo "Decoding release keystore from Codemagic environment variables..."
+            echo "$RELEASE_KEYSTORE_BASE64" | base64 --decode > my-upload-key.jks
+          else
+            echo "RELEASE_KEYSTORE_BASE64 is empty. Generating self-signed fallback keystore..."
+            keytool -genkey -v \
+              -keystore my-upload-key.jks \
+              -alias upload \
+              -keyalg RSA \
+              -keysize 2048 \
+              -validity 10000 \
+              -dname "CN=eoro, OU=app, O=eoro, L=Unknown, S=Unknown, C=US" \
+              -storepass fallback_password \
+              -keypass fallback_password
+            
+            # Export fallback variables for downstream scripts
+            echo "STORE_PASSWORD=fallback_password" >> $FCI_ENV
+            echo "KEY_PASSWORD=fallback_password" >> $FCI_ENV
+          fi
+      - name: Run Unit Tests
+        script: |
+          ./gradlew testDebugUnitTest --no-daemon
+      - name: Build Debug APK
+        script: |
+          ./gradlew :app:assembleDebug --no-daemon
+      - name: Build Release Bundle (AAB)
+        script: |
+          ./gradlew :app:bundleRelease --no-daemon
+    artifacts:
+      - app/build/outputs/apk/debug/*.apk
+      - app/build/outputs/bundle/release/*.aab
+    publishing:
+      email:
+        recipients:
+          - ictlabgsssaidana@gmail.com
+        notify:
+          success: true
+          failure: true

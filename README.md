@@ -9,18 +9,17 @@ A premium, highly-optimized, offline-first Android application designed to help 
 - **Offline Mode & Room Database**: Persistent storage for study chapters, bookmarks, mock scores, custom flashcards, and reading highlights.
 - **Kindle-Style Reader**: Seamless reading mode with custom highlights, page selectors, and multi-language translations (English & Hindi).
 - **Adaptive Flashcards**: Flashcards for crucial terminologies and definitions, complete with favorites filters.
-- **Robust CI/CD**: A comprehensive GitHub Actions workflow that automatically runs unit tests, compiles the debug APK, and builds/signs the release Android App Bundle (AAB).
+- **Robust CI/CD**: A comprehensive Codemagic pipeline configuration (`codemagic.yaml`) that automatically runs unit tests, compiles the debug APK, and builds/signs the release Android App Bundle (AAB).
 
 ---
 
 ## 🛠️ Project Structure & Gradle Build System
 
-This project contains a fully buildable, production-ready Gradle Kotlin DSL setup (`.gradle.kts`) which can be imported directly into **Android Studio** or built on command line via **GitHub Actions** without requiring pre-generation.
+This project contains a fully buildable, production-ready Gradle Kotlin DSL setup (`.gradle.kts`) which can be imported directly into **Android Studio** or built on the command line and automated via **Codemagic** without requiring pre-generation.
 
 ### Directory Structure & Required Files:
 ```text
-├── .github/workflows/
-│   └── android.yml            # Complete GitHub Actions CI/CD Pipeline
+├── codemagic.yaml             # Complete Codemagic CI/CD Pipeline
 ├── app/
 │   ├── build.gradle.kts       # App module Gradle configuration
 │   ├── proguard-rules.pro     # Configured ProGuard/R8 Rules for production
@@ -92,26 +91,26 @@ The generated bundle will be stored at:
 
 ---
 
-## 🤖 GitHub Actions CI/CD Workflow
+## 🤖 Codemagic CI/CD Pipeline
 
-The `.github/workflows/android.yml` pipeline automatically builds and tests your application on every push or pull request to the `main` or `master` branches.
+The `codemagic.yaml` pipeline automatically builds and tests your application on every push or pull request to the `main` or `master` branches.
 
-### Workflow Features:
-1. **JDK 21 Setup**: Installs the latest Java 21 Zulu distribution.
-2. **Gradle Caching**: Caches dependencies and build outputs to ensure fast, incremental execution.
+### Pipeline Features:
+1. **Java 21 Setup**: Configures the build machine with JDK 21.
+2. **Dependency Caching**: Codemagic caches Gradle files and build outputs automatically to ensure fast, incremental execution.
 3. **Unit Testing**: Automatically executes the JVM Robolectric suite.
-4. **Debug Compilation**: Generates the debug APK and uploads it as a workflow artifact (`debug-apk`).
-5. **Keystore Decoding**: Looks for the `RELEASE_KEYSTORE_BASE64` secret. If found, it decodes it and signs the AAB. If not found, it automatically compiles a fallback self-signed keystore to guarantee that the compilation never fails in CI.
-6. **Release Compilation**: Generates the signed release AAB and uploads it as an artifact (`release-aab`).
+4. **Debug Compilation**: Generates the debug APK and registers it as a downloadable build artifact.
+5. **Keystore Decoding**: Looks for the `RELEASE_KEYSTORE_BASE64` environment variable. If found, it decodes it and signs the AAB. If not found, it automatically compiles a fallback self-signed keystore to guarantee that the compilation never fails in your builds.
+6. **Release Compilation**: Generates the signed release AAB and uploads it as a build artifact.
 
 ---
 
-## 🔑 Configured Secrets for Play Store Release
+## 🔑 Environment Variables for Codemagic Release Signing
 
-To sign your release artifacts with your production credentials automatically via GitHub Actions, add the following secrets under **Settings > Secrets and variables > Actions** in your GitHub repository:
+To sign your release artifacts with your production credentials automatically on Codemagic, add the following variables under **Environment variables** (within the `keystore_credentials` group or globally) in your Codemagic application settings:
 
-| Secret Name | Description | Example / Value |
-|-------------|-------------|-----------------|
+| Variable Name | Description | Value Example |
+|---------------|-------------|---------------|
 | `RELEASE_KEYSTORE_BASE64` | Base64-encoded string of your `.keystore` / `.jks` file | `base64 -w 0 my-key.jks` |
 | `STORE_PASSWORD` | Password used to access the Keystore container | `your-secure-keystore-pass` |
 | `KEY_PASSWORD` | Password for the specific key alias inside the Keystore | `your-secure-key-pass` |
@@ -120,7 +119,7 @@ To sign your release artifacts with your production credentials automatically vi
 
 ## 🌐 Deploying to Google Play Store
 
-Once you have downloaded the optimized `app-release.aab` compiled by GitHub Actions, follow these steps to deploy to the Play Store:
+Once you have downloaded the optimized `app-release.aab` compiled by Codemagic, follow these steps to deploy to the Play Store:
 
 1. **Google Play Console**: Log in to your [Google Play Console](https://play.google.com/console).
 2. **Select Application**: Choose **EO RO Officer** or create a new application if this is the first deployment.
